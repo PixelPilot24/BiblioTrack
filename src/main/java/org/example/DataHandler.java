@@ -35,44 +35,59 @@ public class DataHandler {
     /**
      * Fügt ein Buch in die Datenbank und die Buch-Map hinzu.
      *
-     * @param title  Der Titel des Buches.
+     * @param title Der Titel des Buches.
      * @param author Der Autor des Buches.
-     * @param isbn   Die ISBN des Buches.
+     * @param isbn Die ISBN des Buches.
+     * @param id Die ID vom Buch.
+     * @param command Statuscode:
+     * <ul>
+     *     <li>0: Neues Buch hinzufügen</li>
+     *     <li>1: Buch aktualisieren</li>
+     *     <li>2: Buch löschen</li>
+     * </ul>
      */
-    public void setBookMap(String title, String author, String isbn, int id, boolean update) {
+    public void setBookMap(String title, String author, String isbn, int id, int command) {
         try (Connection connection = DriverManager.getConnection(bibUrl, user, password)) {
             Statement statement = connection.createStatement();
             List<Object> mapList = new ArrayList<>();
             int index = id; // Index für das neu erstellte Buch
-
-            // SQL Befehl zum Einfügen von einem neuen Buch
-            String insertCommand = "INSERT INTO book(title, author, isbn) " +
-                    "VALUES('" + title + "', '" + author + "', '" + isbn + "');";
-
-            if (update) {
-                // SQL Befehl zum Überarbeiten vom Buch.
-                insertCommand = "UPDATE book SET " +
-                        "title = '" + title + "' , " +
-                        "author = '" + author + "' , " +
-                        "isbn = '" + isbn + "' " +
-                        "where id = " + id;
-            }
-
-            statement.executeUpdate(insertCommand);
-
-            // Abfrage zum Bestimmen der ID des neuen Buches
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM book");
-
-            while (resultSet.next()) {
-                index = resultSet.getInt("id");
-            }
 
             // Fügt den Titel, Author und ISBN in eine Liste und diese dann in die Buch-Map
             mapList.add(title);
             mapList.add(author);
             mapList.add(isbn);
 
-            this.bookMap.put(String.valueOf(index), mapList);
+            // SQL Befehl zum Einfügen von einem neuen Buch
+            String insertCommand = "INSERT INTO book(title, author, isbn) " +
+                    "VALUES('" + title + "', '" + author + "', '" + isbn + "');";
+
+            if (command == 1) {
+                // SQL Befehl zum Überarbeiten vom Buch.
+                insertCommand = "UPDATE book SET " +
+                        "title = '" + title + "' , " +
+                        "author = '" + author + "' , " +
+                        "isbn = '" + isbn + "' " +
+                        "where id = " + id;
+                this.bookMap.remove(String.valueOf(index));
+                this.bookMap.put(String.valueOf(index), mapList);
+            } else if (command == 2) {
+                // SQL Befehl zum Löschen von einem Buch
+                insertCommand = "DELETE from book where id = " + id;
+                this.bookMap.remove(String.valueOf(index));
+            }
+
+            statement.executeUpdate(insertCommand);
+
+            if (command == 0) {
+                // Abfrage zum Bestimmen der ID des neuen Buches
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM book");
+
+                while (resultSet.next()) {
+                    index = resultSet.getInt("id");
+                }
+
+                this.bookMap.put(String.valueOf(index), mapList);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

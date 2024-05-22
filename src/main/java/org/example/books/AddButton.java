@@ -165,7 +165,7 @@ public class AddButton extends JButton {
             } else if (isbnCorrect == 3) {
                 showMessageDialog("Die letzte Zahl stimmt nicht überein");
             } else {
-                dataHandler.setBookMap(titel, author, isbn, 0, false);
+                dataHandler.setBookMap(titel, author, isbn, 0, 0);
                 JOptionPane.showMessageDialog(
                         new JOptionPane(),
                         "Neues Buch erfolgreich gespeichert",

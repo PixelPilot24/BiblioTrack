@@ -5,10 +5,27 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 ## Änderungen vor der Basisversion
 ## Inhaltsverzeichnis
 - [2024-05-22](#2024-05-22)
+- [2024-05-22](#2024-05-22-1)
 - [2024-05-21](#2024-05-21)
 - [2024-05-17](#2024-05-17)
 
-### 2024-05-22
+
+## 2024-05-22
+Refaktorierung
+- Neue Methoden hinzugefügt: Books.java
+- Methoden überarbeitet: DataHandler.java
+
+Books.java
+- Methode zur Erstellung eines Buttons zum Löschen
+- Methode zur Löschung eines Buches
+
+DataHandler.java
+- setBookMap Methode überarbeitet:
+  - Boolean "update" Parameter durch Integer "command" ersetzt
+  - Kondition für den "DELETE" Befehl hinzugefügt
+
+
+## 2024-05-22
 Refaktorierung
 - Neue Datei erstellt: AddButton.java
 - Dateien verschoben:
@@ -17,7 +34,7 @@ Refaktorierung
 DataHandler.java
 - setBookMap Methode überarbeitet
   - Integer id und Boolean update Parameter
-  - Kondition für das "UPDATE" Befehl
+  - Kondition für das "UPDATE" Befehl hinzugefügt
 
 Books.java
 - Methode zur Erstellung der Tabelle
@@ -27,7 +44,7 @@ AddButton.java
 - Methoden für das Hinzufügen eines neuen Buches in eine Klasse verschoben
 
 
-### 2024-05-21
+## 2024-05-21
 Refaktorierung
 - Methode zum Hinzufügen neuer Bücher
 - Neue Dateien hinzugefügt: DataHandler.java, ISBNValidator
@@ -55,7 +72,7 @@ ISBNValidator
 - Methode zum Validieren von ISBN-13
 
 
-### 2024-05-17
+## 2024-05-17
 Refaktorierung
 - GUI Erstellung
 - Neue Dateien hinzugefügt: Main.java, Member.java, Lending.java, Books.java, CHANGELOG.md

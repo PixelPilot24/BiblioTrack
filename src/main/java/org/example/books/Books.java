@@ -16,12 +16,12 @@ import java.util.List;
  * */
 public class Books extends JPanel {
     private final DataHandler dataHandler;
-    private final Map<String, List<Object>> booksMap;
     private final JPanel mainPanel;
 
     private DefaultTableModel booksTableModel;
     private JTable booksTable;
     private Map<String, List<Object>> currentBook;
+    private Map<String, List<Object>> booksMap;
 
     /**
      * Konstruktor für das Books-Panel.
@@ -78,6 +78,7 @@ public class Books extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
+                    booksMap = dataHandler.getBookMap();
                     currentBook = new HashMap<>();
                     JTable target = (JTable) e.getSource();
                     int row = target.getSelectedRow();
@@ -86,9 +87,77 @@ public class Books extends JPanel {
                     List<List<Object>> listsValues = new ArrayList<>(booksMap.values());
                     List<Object> booksValues = listsValues.get(row);
                     currentBook.put(bookID, booksValues);
+
+                    deleteButton(bookID, booksValues, row);
                 }
             }
         });
+    }
+
+    /**
+     * Erstellung eines Löschen-Buttons.
+     *
+     * @param bookID Die Buch-ID in der Datenbank.
+     * @param values Eine {@code List<Object>} mit dem Titel, Autor und ISBN.
+     * @param row Die aktuelle Reihe.
+     * */
+    private void deleteButton(String bookID, List<Object> values, int row) {
+        JPanel buttonPanel = (JPanel) getComponent(1);
+
+        // Wenn es einen Löschen-Button gibt, dann wird dieser gelöscht
+        if (buttonPanel.getComponentCount() == 2) {
+            buttonPanel.remove(1);
+        }
+
+        JButton deleteButton = addDeleteButton(bookID, values, row);
+        buttonPanel.add(deleteButton);
+
+        repaint();
+        revalidate();
+    }
+
+    /**
+     * Erstellt und gestaltet den Löschen-Button.
+     *
+     * @param bookID Die Buch-ID in der Datenbank.
+     * @param values Eine {@code List<Object>} mit dem Titel, Autor und ISBN.
+     * @param row Die aktuelle Reihe.
+     *
+     * @return Gibt den Löschen-Button aus.
+     * */
+    private JButton addDeleteButton(String bookID, List<Object> values, int row) {
+        JButton deleteButton = new JButton("Löschen");
+        deleteButton.addActionListener(_ -> {
+            String title = (String) values.get(0);
+            String author = (String) values.get(1);
+            String isbn = (String) values.get(2);
+            int confirmMessage = JOptionPane.showConfirmDialog(
+                    new JOptionPane(),
+                    "Soll das Buch gelöscht werden?\n\n" +
+                            "Titel: " + title + "\n" +
+                            "Autor: " + author + "\n" +
+                            "ISBN: " + isbn,
+                    "Löschen",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            // Wenn die Message bestätigt wird, dann wir das Buch entfernt
+            if (confirmMessage == JOptionPane.YES_OPTION) {
+                // Löscht das Buch aus der Datenbank und aktualisiert die Map
+                int id = Integer.parseInt(bookID);
+                dataHandler.setBookMap(title, author, isbn, id, 2);
+                booksMap = dataHandler.getBookMap();
+
+                // Löscht das Buch aus der Tabelle und aktualisiert das Hauptfenster
+                JPanel buttonPanel = (JPanel) getComponent(1);
+                buttonPanel.remove(1);
+                booksTableModel.removeRow(row);
+                repaint();
+                revalidate();
+            }
+        });
+
+        return deleteButton;
     }
 
     /**
@@ -140,7 +209,7 @@ public class Books extends JPanel {
             addButton.showMessageDialog("Die letzte Zahl stimmt nicht überein");
             return false;
         } else {
-            dataHandler.setBookMap(title, author, isbn, id, true);
+            dataHandler.setBookMap(title, author, isbn, id, 1);
             return true;
         }
     }
@@ -153,10 +222,10 @@ public class Books extends JPanel {
 
         JPanel buttonPanel = new JPanel();
         JButton addButton = new AddButton(mainPanel, dataHandler, booksTableModel);
-        JButton deleteButton = new JButton("Löschen");
+        //JButton deleteButton = new JButton("Löschen");
 
         buttonPanel.add(addButton);
-        buttonPanel.add(deleteButton);
+        //buttonPanel.add(deleteButton);
 
         add(scrollPane, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
