@@ -1,4 +1,7 @@
-package org.example;
+package org.example.books;
+
+import org.example.DataHandler;
+import org.example.ISBNValidator;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -7,70 +10,45 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * Diese Klasse stellt das {@code JPanel} für die Verwaltung von Büchern dar.
- * */
-public class Books extends JPanel {
-    private final JTable booksTable;
-    private final DataHandler dataHandler;
-
+public class AddButton extends JButton {
     private final String[] columnNames = {"Titel", "Autor", "ISBN"};
     private final Font inputFont = new Font("Arial", Font.PLAIN,18);
-
-    private JPanel mainPanel;
+    private final JPanel mainPanel;
+    private final DataHandler dataHandler;
+    private final DefaultTableModel defaultTableModel;
 
     /**
-     * Konstruktor für das Books-Panel.
+     * Konstruktor zum Initialisieren der Daten und gestaltung des Buttons.
      *
+     * @param mainPanel {@code JPanel} vom Haupt-Panel.
      * @param dataHandler Handler für Datenoperationen.
-     */
-    public Books(DataHandler dataHandler) {
-        setLayout(new BorderLayout());
-        DefaultTableModel booksTableModel = new DefaultTableModel(columnNames, 0);
-        booksTable = new JTable(booksTableModel);
+     * @param tableModel Zum Hinzufügen eines neuen Buches.
+     * */
+    public AddButton(JPanel mainPanel, DataHandler dataHandler, DefaultTableModel tableModel) {
+        this.mainPanel = mainPanel;
         this.dataHandler = dataHandler;
-
-        createWidgets();
-    }
-
-    /**
-     * Erstellt die Widgets und fügt sie dem Panel hinzu.
-     */
-    private void createWidgets() {
-        JScrollPane scrollPane = new JScrollPane(booksTable);
-
-        JPanel buttonPanel = new JPanel();
-        JButton addButton = new JButton("Hinzufügen");
-        addButton.addActionListener(_ -> addButtonListener());
-        JButton editButton = new JButton("Bearbeiten");
-        JButton deleteButton = new JButton("Löschen");
-
-        buttonPanel.add(addButton);
-        buttonPanel.add(editButton);
-        buttonPanel.add(deleteButton);
-
-        add(scrollPane, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        this.defaultTableModel = tableModel;
+        setText("Hinzufügen");
+        addActionListener(_ -> createDialog(saveButton(), "Neues Buch hinzufügen"));
     }
 
     /**
      * Listener für den Hinzufügen-Button.
      * Öffnet einen Dialog zur Eingabe eines neun Buches.
      * */
-    private void addButtonListener() {
+    public void createDialog(JButton button, String title) {
         // Erstellung und gestaltung vom Dialogfenster
         JDialog dialog = new JDialog();
         dialog.setLayout(new GridLayout(0,1));
-        dialog.setTitle("Neues Buch hinzufügen");
+        dialog.setTitle(title);
         dialog.setSize(400,400);
         dialog.setLocationRelativeTo(null);
 
         // Panel für die Widgets
         JPanel panel = new JPanel(new FlowLayout());
-        mainPanel = new JPanel(new BorderLayout(10,10));
         JPanel titlePanel = new JPanel(new GridLayout(0, 1, 10, 10));
 
         Font borderFont = new Font("Arial", Font.PLAIN,20);
@@ -101,7 +79,8 @@ public class Books extends JPanel {
         JTextField textField = (JTextField) textPanel.getComponent(0);
         textField.addKeyListener(getKeyAdapter());
 
-        mainPanel.add(saveButton(), BorderLayout.SOUTH);
+        //mainPanel.add(saveButton(), BorderLayout.SOUTH);
+        mainPanel.add(button, BorderLayout.SOUTH);
         panel.add(mainPanel);
         dialog.add(panel);
 
@@ -186,7 +165,7 @@ public class Books extends JPanel {
             } else if (isbnCorrect == 3) {
                 showMessageDialog("Die letzte Zahl stimmt nicht überein");
             } else {
-                dataHandler.setBookMap(titel, author, isbn);
+                dataHandler.setBookMap(titel, author, isbn, 0, false);
                 JOptionPane.showMessageDialog(
                         new JOptionPane(),
                         "Neues Buch erfolgreich gespeichert",
@@ -200,6 +179,8 @@ public class Books extends JPanel {
 
                     textField.setText("");
                 }
+
+                defaultTableModel.addRow(new Object[]{titel, author, isbn});
             }
         });
 
@@ -211,7 +192,7 @@ public class Books extends JPanel {
      *
      * @param message Die anzuzeigende Fehlermeldung
      */
-    private void showMessageDialog(String message) {
+    public void showMessageDialog(String message) {
         JOptionPane.showMessageDialog(
                 new JOptionPane(), message, "Fehler", JOptionPane.ERROR_MESSAGE
         );

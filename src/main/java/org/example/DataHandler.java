@@ -15,9 +15,9 @@ public class DataHandler {
     private final String user = "postgres"; // TODO Namen anpassen
     private final String password = ""; // TODO Passwort anpassen
 
-    private Map<String, List<Object>> bookMap;; // Map zur Speicherung von Büchern
-    private Map<String, List<Object>> memberMap;; // Map zur Speicherung von Mitgliedern
-    private Map<String, List<Object>> lendingMap;; // Map zur Speicherung von ausgeliehenen Büchern
+    private Map<String, List<Object>> bookMap; // Map zur Speicherung von Büchern
+    private Map<String, List<Object>> memberMap; // Map zur Speicherung von Mitgliedern
+    private Map<String, List<Object>> lendingMap; // Map zur Speicherung von ausgeliehenen Büchern
 
     /**
      * Gibt die Buch-Map zurück, falls die Map null ist, wird diese initialisiert.
@@ -39,15 +39,25 @@ public class DataHandler {
      * @param author Der Autor des Buches.
      * @param isbn   Die ISBN des Buches.
      */
-    public void setBookMap(String title, String author, String isbn) {
+    public void setBookMap(String title, String author, String isbn, int id, boolean update) {
         try (Connection connection = DriverManager.getConnection(bibUrl, user, password)) {
             Statement statement = connection.createStatement();
             List<Object> mapList = new ArrayList<>();
-            int index = 0; // Index für das neu erstellte Buch
+            int index = id; // Index für das neu erstellte Buch
 
             // SQL Befehl zum Einfügen von einem neuen Buch
             String insertCommand = "INSERT INTO book(title, author, isbn) " +
                     "VALUES('" + title + "', '" + author + "', '" + isbn + "');";
+
+            if (update) {
+                // SQL Befehl zum Überarbeiten vom Buch.
+                insertCommand = "UPDATE book SET " +
+                        "title = '" + title + "' , " +
+                        "author = '" + author + "' , " +
+                        "isbn = '" + isbn + "' " +
+                        "where id = " + id;
+            }
+
             statement.executeUpdate(insertCommand);
 
             // Abfrage zum Bestimmen der ID des neuen Buches
@@ -73,6 +83,7 @@ public class DataHandler {
      *
      * @return Gibt die Mitglieder-Map zurück
      * */
+    @SuppressWarnings("unused")
     public Map<String, List<Object>> getMemberMap() {
         if (memberMap == null) {
             connection();
@@ -86,6 +97,7 @@ public class DataHandler {
      *
      * @return Ausgeliehene Bücher.
      * */
+    @SuppressWarnings("unused")
     public Map<String, List<Object>> getLendingMap() {
         if (lendingMap == null) {
             connection();
