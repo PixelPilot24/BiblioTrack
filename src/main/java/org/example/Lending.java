@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.data.DataHandler;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;

@@ -1,6 +1,6 @@
 package org.example.books;
 
-import org.example.DataHandler;
+import org.example.data.DataHandler;
 import org.example.ISBNValidator;
 
 import javax.swing.*;
@@ -32,14 +32,17 @@ public class AddButton extends JButton {
         this.dataHandler = dataHandler;
         this.defaultTableModel = tableModel;
         setText("Hinzufügen");
-        addActionListener(_ -> createDialog(saveButton(), "Neues Buch hinzufügen"));
+        addActionListener(_ -> createDialog(
+                saveButton(), "Neues Buch hinzufügen", columnNames, mainPanel, true
+        ));
     }
 
     /**
      * Listener für den Hinzufügen-Button.
      * Öffnet einen Dialog zur Eingabe eines neun Buches.
      * */
-    public void createDialog(JButton button, String title) {
+    public void createDialog(JButton button, String title, String[] columnNames, JPanel mainPanel,
+                             boolean book) {
         // Erstellung und gestaltung vom Dialogfenster
         JDialog dialog = new JDialog();
         dialog.setLayout(new GridLayout(0,1));
@@ -77,9 +80,8 @@ public class AddButton extends JButton {
         // Fehler aus
         JPanel textPanel = (JPanel) titlePanel.getComponent(2);
         JTextField textField = (JTextField) textPanel.getComponent(0);
-        textField.addKeyListener(getKeyAdapter());
+        textField.addKeyListener(getKeyAdapter(book));
 
-        //mainPanel.add(saveButton(), BorderLayout.SOUTH);
         mainPanel.add(button, BorderLayout.SOUTH);
         panel.add(mainPanel);
         dialog.add(panel);
@@ -93,10 +95,17 @@ public class AddButton extends JButton {
      *
      * @return {@code KeyListener} für das ISBN-Eingabefeld
      */
-    private KeyListener getKeyAdapter() {
-        // Pattern um sicherzustellen das nur Zahlen, Punkt und wenn gelöscht wird,
-        // akzeptiert wird
-        Pattern pattern = Pattern.compile("^[0-9\bX]+$");
+    private KeyListener getKeyAdapter(boolean book) {
+        Pattern pattern;
+
+        if (!book) {
+            // Pattern für die Eingabe der Telefonnummer (Nur Zahlen)
+            pattern = Pattern.compile("^[0-9]+$");
+        } else {
+            // Pattern für die Eingabe der ISBN (Zahlen, Löschen, X)
+            pattern = Pattern.compile("^[0-9\bX]+$");
+        }
+
         JPanel titlePanel = (JPanel) mainPanel.getComponent(0);
         JPanel textPanel = (JPanel) titlePanel.getComponent(2);
         JTextField textField = (JTextField) textPanel.getComponent(0);
@@ -108,10 +117,15 @@ public class AddButton extends JButton {
                 char c = keyEvent.getKeyChar();
                 Matcher matcher = pattern.matcher(String.valueOf(c));
 
-                // Wenn die Eingabe nicht im Pattern ist oder es 13 Zeichen sind,
-                // dann wird nichts eingegeben
-                if (!matcher.matches() || textField.getText().length() == 13) {
-                    keyEvent.consume();
+                // Überprüft welche Länge benötigt wird. Für ISBN 13, für Telefonnummer 15
+                if (book) {
+                    if (!matcher.matches() || textField.getText().length() == 13) {
+                        keyEvent.consume();
+                    }
+                } else {
+                    if (!matcher.matches() || textField.getText().length() == 15) {
+                        keyEvent.consume();
+                    }
                 }
             }
         };

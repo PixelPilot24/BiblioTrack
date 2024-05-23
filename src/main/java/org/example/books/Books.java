@@ -1,6 +1,6 @@
 package org.example.books;
 
-import org.example.DataHandler;
+import org.example.data.DataHandler;
 import org.example.ISBNValidator;
 
 import javax.swing.*;
@@ -191,27 +191,23 @@ public class Books extends JPanel {
 
         if (title.isEmpty()) {
             addButton.showMessageDialog("Der Titel darf nicht leer sein");
-            return false;
         } else if (author.isEmpty()) {
             addButton.showMessageDialog("Der Autor darf nicht leer sein");
-            return false;
         } else if (isbn.isEmpty()) {
             addButton.showMessageDialog("Der ISBN darf nicht leer sein");
-            return false;
         } else if (isbnCorrect == 1) {
             addButton.showMessageDialog("Der ISBN muss aus Zahlen bestehen");
-            return false;
         } else if (isbnCorrect == 2) {
             addButton.showMessageDialog("Der ISBN hat nicht die richtige Länge." +
                     "\nEntweder sind es 10 oder 13 Zeichen");
-            return false;
         } else if (isbnCorrect == 3) {
             addButton.showMessageDialog("Die letzte Zahl stimmt nicht überein");
-            return false;
         } else {
             dataHandler.setBookMap(title, author, isbn, id, 1);
             return true;
         }
+
+        return false;
     }
 
     /**

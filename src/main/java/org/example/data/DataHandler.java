@@ -1,4 +1,4 @@
-package org.example;
+package org.example.data;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,11 +10,7 @@ import java.util.Map;
  * Die DataHandler-Klasse verwaltet die Datenbankverbindung und Operationen für die Bibliothek.
  * Sie ermöglicht das Laden, Speichern und Verwalten von Büchern, Mitgliedern und ausgeliehenen Büchern.
  */
-public class DataHandler {
-    private final String bibUrl = "jdbc:postgresql://localhost:5432/bibliotrack";
-    private final String user = "postgres"; // TODO Namen anpassen
-    private final String password = ""; // TODO Passwort anpassen
-
+public class DataHandler extends SetMaps {
     private Map<String, List<Object>> bookMap; // Map zur Speicherung von Büchern
     private Map<String, List<Object>> memberMap; // Map zur Speicherung von Mitgliedern
     private Map<String, List<Object>> lendingMap; // Map zur Speicherung von ausgeliehenen Büchern
@@ -33,7 +29,7 @@ public class DataHandler {
     }
 
     /**
-     * Fügt ein Buch in die Datenbank und die Buch-Map hinzu.
+     * Fügt, löscht oder bearbeitet ein Buch in die Datenbank und gleicht die bookMap ab.
      *
      * @param title Der Titel des Buches.
      * @param author Der Autor des Buches.
@@ -47,50 +43,7 @@ public class DataHandler {
      * </ul>
      */
     public void setBookMap(String title, String author, String isbn, int id, int command) {
-        try (Connection connection = DriverManager.getConnection(bibUrl, user, password)) {
-            Statement statement = connection.createStatement();
-            List<Object> mapList = new ArrayList<>();
-            int index = id; // Index für das neu erstellte Buch
-
-            // Fügt den Titel, Author und ISBN in eine Liste und diese dann in die Buch-Map
-            mapList.add(title);
-            mapList.add(author);
-            mapList.add(isbn);
-
-            // SQL Befehl zum Einfügen von einem neuen Buch
-            String insertCommand = "INSERT INTO book(title, author, isbn) " +
-                    "VALUES('" + title + "', '" + author + "', '" + isbn + "');";
-
-            if (command == 1) {
-                // SQL Befehl zum Überarbeiten vom Buch.
-                insertCommand = "UPDATE book SET " +
-                        "title = '" + title + "' , " +
-                        "author = '" + author + "' , " +
-                        "isbn = '" + isbn + "' " +
-                        "where id = " + id;
-                this.bookMap.remove(String.valueOf(index));
-                this.bookMap.put(String.valueOf(index), mapList);
-            } else if (command == 2) {
-                // SQL Befehl zum Löschen von einem Buch
-                insertCommand = "DELETE from book where id = " + id;
-                this.bookMap.remove(String.valueOf(index));
-            }
-
-            statement.executeUpdate(insertCommand);
-
-            if (command == 0) {
-                // Abfrage zum Bestimmen der ID des neuen Buches
-                ResultSet resultSet = statement.executeQuery("SELECT * FROM book");
-
-                while (resultSet.next()) {
-                    index = resultSet.getInt("id");
-                }
-
-                this.bookMap.put(String.valueOf(index), mapList);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        bookMap = setterBookMap(title, author, isbn, id, command, bookMap);
     }
 
     /**
@@ -98,13 +51,30 @@ public class DataHandler {
      *
      * @return Gibt die Mitglieder-Map zurück
      * */
-    @SuppressWarnings("unused")
     public Map<String, List<Object>> getMemberMap() {
         if (memberMap == null) {
             connection();
         }
 
         return memberMap;
+    }
+
+    /**
+     * Fügt, löscht oder bearbeitet ein Mitglied in der Datenbank und gleicht die memberMap ab.
+     *
+     * @param name Der Name vom Mitglied.
+     * @param email Die E-Mail vom Mitglied.
+     * @param phone Die Telefonnummer vom Mitglied.
+     * @param id Der Index vom Mitglied. Falls nicht bekannt dann 0.
+     * @param command Statuscode:
+     *                <ul>
+     *                <li>0: Neues Mitglied hinzufügen</li>
+     *                <li>1: Mitglied aktualisieren</li>
+     *                <li>0: Mitglied löschen</li>
+     *                </ul>
+     * */
+    public void setMemberMap(String name, String email, String phone, int id, int command) {
+        memberMap = setterMemberMap(name, email, phone, id, command, memberMap);
     }
 
     /**
@@ -202,7 +172,7 @@ public class DataHandler {
             int id = resultMember.getInt("id");
             String name = resultMember.getString("name");
             String email = resultMember.getString("email");
-            int phone = resultMember.getInt("phone");
+            String phone = resultMember.getString("phone");
             List<Object> mapList = new ArrayList<>();
 
             mapList.add(name);
@@ -256,7 +226,7 @@ public class DataHandler {
                 "id SERIAL PRIMARY KEY," +
                 "name VARCHAR(100) NOT NULL," +
                 "email VARCHAR(50) NOT NULL," +
-                "phone INT NOT NULL" +
+                "phone VARCHAR(15) NOT NULL" +
                 ");";
         String commandLending = "CREATE TABLE lending(" +
                 "id SERIAL PRIMARY KEY," +

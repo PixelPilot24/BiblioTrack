@@ -4,10 +4,42 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 ## Änderungen vor der Basisversion
 ## Inhaltsverzeichnis
+- [2024-05-23](#2024-05-23)
 - [2024-05-22](#2024-05-22)
 - [2024-05-22](#2024-05-22-1)
 - [2024-05-21](#2024-05-21)
 - [2024-05-17](#2024-05-17)
+
+## 2024-05-23
+Refaktorierung
+- Neue Datei erstellt: SetMaps.java, AddMember.java
+- Neues Verzeichnis erstellt: member
+- Methden erstellt: Member.java
+- Methoden überarbeitet: AddButton.java
+
+DataHandler.java
+- Funktion von setBookMap und setMemberMap Methoden nach SetMaps.java ausgelagert
+
+SetMaps.java
+- Methode zum Hinzufügen, Löschen, überarbeiten der Bücher
+- Methode zum Hinzufügen, Löschen, überarbeiten der Mitglieder
+
+Member.java
+- In das Verzeichnis member verschoben
+- Methode zur Erstellung der Tabelle hinzugefügt
+- Methode zu Erstellung eines Buttons zum Löschen eines Mitgliedes hinzugefügt
+- Methode zur Speicherung der Veränderung hinzugefügt
+
+AddMemberButton.java
+- Methode zur Erstellung des Buttons zum Speichern der Mitglieder
+- Methode zur Überprüfung der Telefonnummer
+
+AddButton.java
+- Parameter für createDialog Methode hinzugefügt
+  - String[] columnNames, JPanel mainPanel, boolean book
+- getKeyAdapter Methode überarbeitet
+  - Kondition für Pattern hinzugefügt
+  - Kondition für die Länge der Eingabe hinzugefügt
 
 
 ## 2024-05-22
