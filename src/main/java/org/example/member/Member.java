@@ -1,7 +1,7 @@
 package org.example.member;
 
-import org.example.books.AddButton;
 import org.example.data.DataHandler;
+import org.example.helper.HelperClass;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -129,12 +129,15 @@ public class Member extends JPanel {
             String name = (String) values.getFirst();
             String email = (String) values.get(1);
             String phone = (String) values.get(2);
+            String message = String.format("""
+                            Soll das Mitglied wirklich gelöscht werden?
+
+                            Name: %s
+                            E-Mail: %s
+                            Telefonnummer: %s""", name, email, phone);
             int confirmMessage = JOptionPane.showConfirmDialog(
                     new JOptionPane(),
-                    "Soll das Mitglied wirklich gelöscht werden?\n\n" +
-                            "Name: " + name + "\n" +
-                            "E-Mail: " + email + "\n" +
-                            "Telefonnummer: " + phone + "\n",
+                    message,
                     "Löschen",
                     JOptionPane.YES_NO_OPTION
             );
@@ -169,7 +172,8 @@ public class Member extends JPanel {
      * </ul>
      * */
     private boolean saveChanges(Object aValue, int column) {
-        AddButton addButton = new AddButton(mainPanel, dataHandler, memberTableModel);
+        HelperClass helper = new HelperClass();
+
         AddMemberButton addMemberButton = new AddMemberButton(mainPanel, dataHandler, memberTableModel);
         // Bestimmt die ID und die Liste mit dem Titel, der E-Mail und der Telefonnummer
         List<String> keyList = new ArrayList<>(currentMember.keySet());
@@ -191,13 +195,13 @@ public class Member extends JPanel {
         }
         
         if (name.isEmpty()) {
-            addButton.showMessageDialog("Der Name darf nicht leer sein");
+            helper.showMessageDialog("Der Name darf nicht leer sein");
         } else if (email.isEmpty()) {
-            addButton.showMessageDialog("Die E-Mail darf nicht leer sein");
+            helper.showMessageDialog("Die E-Mail darf nicht leer sein");
         } else if (phone.isEmpty()) {
-            addButton.showMessageDialog("Die Telefonnummer darf nicht leer sein");
+            helper.showMessageDialog("Die Telefonnummer darf nicht leer sein");
         } else if (addMemberButton.checkPhone(phone)) {
-            addButton.showMessageDialog("Die Telefonnummer darf nur Zahlen beinhalten");
+            helper.showMessageDialog("Die Telefonnummer darf nur Zahlen beinhalten");
         } else {
             dataHandler.setMemberMap(name, email, phone, id, 1);
             return true;

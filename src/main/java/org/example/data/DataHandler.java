@@ -70,7 +70,7 @@ public class DataHandler extends SetMaps {
      *                <ul>
      *                <li>0: Neues Mitglied hinzufügen</li>
      *                <li>1: Mitglied aktualisieren</li>
-     *                <li>0: Mitglied löschen</li>
+     *                <li>2: Mitglied löschen</li>
      *                </ul>
      * */
     public void setMemberMap(String name, String email, String phone, int id, int command) {
@@ -98,36 +98,42 @@ public class DataHandler extends SetMaps {
     public void connection() {
         String url = "jdbc:postgresql://localhost:5432/";
 
-        try (Connection connection = DriverManager.getConnection(url, user, password)) {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT datname FROM pg_database;");
+        try {
+            Class.forName("org.postgresql.Driver");
 
-            boolean databaseExists = false;
+            try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT datname FROM pg_database;");
 
-            // Überprüft, ob die Datenbank existiert
-            while (resultSet.next()) {
-                String databaseName = resultSet.getString("datname");
-                if (databaseName.equals("bibliotrack")) {
-                    databaseExists = true;
-                    break;
+                boolean databaseExists = false;
+
+                // Überprüft, ob die Datenbank existiert
+                while (resultSet.next()) {
+                    String databaseName = resultSet.getString("datname");
+                    if (databaseName.equals("bibliotrack")) {
+                        databaseExists = true;
+                        break;
+                    }
+                }
+
+                // Wenn die Datenbank existiert, dann werden die Daten geladen. Wenn nicht,
+                // dann wird eine neue Datenbank erstellt
+                if (databaseExists) {
+                    try (Connection bibConnection = DriverManager.getConnection(bibUrl, user, password)) {
+                        loadData(bibConnection);
+                    }
+                } else {
+                    statement.executeUpdate("CREATE DATABASE bibliotrack");
+
+                    try (Connection bibConnection = DriverManager.getConnection(bibUrl, user, password)) {
+                        createDatabase(bibConnection);
+                    }
                 }
             }
 
-            // Wenn die Datenbank existiert, dann werden die Daten geladen. Wenn nicht,
-            // dann wird eine neue Datenbank erstellt
-            if (databaseExists) {
-                try (Connection bibConnection = DriverManager.getConnection(bibUrl, user, password)) {
-                    loadData(bibConnection);
-                }
-            } else {
-                statement.executeUpdate("CREATE DATABASE bibliotrack");
-
-                try (Connection bibConnection = DriverManager.getConnection(bibUrl, user, password)) {
-                    createDatabase(bibConnection);
-                }
-            }
-
-        } catch (SQLException e) {
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("PostgreSQL JDBC Driver not found.", e);
+        }  catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

@@ -2,6 +2,7 @@ package org.example.member;
 
 import org.example.books.AddButton;
 import org.example.data.DataHandler;
+import org.example.helper.HelperClass;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -47,35 +48,23 @@ public class AddMemberButton extends JButton {
         JButton saveButton = new JButton("Speichern");
         saveButton.setFont(inputFont);
         saveButton.addActionListener(_ -> {
-            AddButton addButton = new AddButton(mainPanel, dataHandler, defaultTableModel);
-            String name;
-            String email;
-            String phone;
-            String[] values = new String[3];
+            HelperClass helper = new HelperClass();
+
             JPanel titlePanel = (JPanel) mainPanel.getComponent(0);
-
-            // Bestimmt den Inhalt der Eingaben und fügt diese in eine Liste hinzu
-            for (int i = 0; i < 3; i++) {
-                JPanel textPanel = (JPanel) titlePanel.getComponent(i);
-                JTextField textField = (JTextField) textPanel.getComponent(0);
-                String value = textField.getText();
-
-                values[i] = value;
-            }
-
+            String[] values = helper.getValues(titlePanel);
             // Bestimmt die einzelnen Variablen
-            name = values[0];
-            email = values[1];
-            phone = values[2];
+            String name = values[0];
+            String email = values[1];
+            String phone = values[2];
 
             if (name.isEmpty()) {
-                addButton.showMessageDialog("Der Name darf nicht leer sein");
+                helper.showMessageDialog("Der Name darf nicht leer sein");
             } else if (email.isEmpty()) {
-                addButton.showMessageDialog("Die E-Mail darf nicht leer sein");
+                helper.showMessageDialog("Die E-Mail darf nicht leer sein");
             } else if (phone.isEmpty()) {
-                addButton.showMessageDialog("Die Telefonnummer darf nicht leer sein");
+                helper.showMessageDialog("Die Telefonnummer darf nicht leer sein");
             } else if (checkPhone(phone)) {
-                addButton.showMessageDialog("Die Telefonnummer darf nur Zahlen beinhalten");
+                helper.showMessageDialog("Die Telefonnummer darf nur Zahlen beinhalten");
             } else {
                 // Speichert die Mitglieder in der Datenbank
                 dataHandler.setMemberMap(name, email, phone, 0, 0);
@@ -86,16 +75,8 @@ public class AddMemberButton extends JButton {
                         JOptionPane.INFORMATION_MESSAGE
                 );
 
-                // Leert die Textfelder
-                for (int i = 0; i < 3; i++) {
-                    JPanel textPanel = (JPanel) titlePanel.getComponent(i);
-                    JTextField textField = (JTextField) textPanel.getComponent(0);
-
-                    textField.setText("");
-                }
-
                 // Fügt der Tabelle eine weitere Reihe mit dem neuen Mitglied hinzu
-                defaultTableModel.addRow(new Object[]{name, email, phone});
+                helper.addRowInTable(titlePanel, values, defaultTableModel);
             }
         });
 

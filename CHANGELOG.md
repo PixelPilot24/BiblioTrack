@@ -4,11 +4,42 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 ## Änderungen vor der Basisversion
 ## Inhaltsverzeichnis
+- [2024-05-27](#2024-05-27)
 - [2024-05-23](#2024-05-23)
 - [2024-05-22](#2024-05-22)
 - [2024-05-22](#2024-05-22-1)
 - [2024-05-21](#2024-05-21)
 - [2024-05-17](#2024-05-17)
+
+
+## 2024-05-27
+Refaktorierung
+- Neue Datei erstellt: HelperClass.java
+- Methoden überarbeitet: AddButton.java, Member.java, Books.java, AddMemberButton.java, DataHandler.java, SetMaps.java
+
+HelperClass.java
+- Methode zur bestimmung des Inhalts der Textfelder
+- Methode zum Hinzufügen einer neuen Zeile
+- Methode zum Anzeigen einer Fehlermeldung
+
+AddButton.java und AddMemberButton.java
+- Methoden von der HelperClass in saveButton Methode eingefügt
+
+Member.java und Books.java
+- Methoden von der HelperClass in saveChanges Methode eingefügt
+
+DataHandler.java
+- Try catch Statement in die connection Methode hinzugefügt
+
+SetMaps.java
+- Methode zum Ausführen von dem SQL Befehl hinzugefügt
+- setterMemberMap Methode überarbeitet:
+  - Befehle anders gestaltet
+  - Methode zum Ausführen des SQL Befehls eingefügt
+- setterBookMap Methode überarbeitet:
+  - Befehle anders gestaltet
+  - Methode zum Ausführen des SQL Befehls eingefügt
+
 
 ## 2024-05-23
 Refaktorierung

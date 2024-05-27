@@ -2,6 +2,7 @@ package org.example.books;
 
 import org.example.data.DataHandler;
 import org.example.ISBNValidator;
+import org.example.helper.HelperClass;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -141,24 +142,14 @@ public class AddButton extends JButton {
         JButton saveButton = new JButton("Speichern");
         saveButton.setFont(inputFont);
         saveButton.addActionListener(_ -> {
-            String titel;
-            String author;
-            String isbn;
-            String[] values = new String[3]; // Liste für die Eingaben
+            HelperClass helper = new HelperClass();
+
             JPanel titlePanel = (JPanel) mainPanel.getComponent(0);
+            String[] values = helper.getValues(titlePanel);
 
-            // Extrahiert die eingegebenen Texte aus den Feldern und fügt diese in die Liste hinzu
-            for (int i = 0; i < 3; i++) {
-                JPanel textPanel = (JPanel) titlePanel.getComponent(i);
-                JTextField textField = (JTextField) textPanel.getComponent(0);
-                String value = textField.getText();
-
-                values[i] = value;
-            }
-
-            titel = values[0];
-            author = values[1];
-            isbn = values[2];
+            String titel = values[0];
+            String author = values[1];
+            String isbn = values[2];
 
             // Überprüft, ob die ISBN richtig ist
             int isbnCorrect = new ISBNValidator().isValid(isbn);
@@ -166,18 +157,18 @@ public class AddButton extends JButton {
             // Überprüft, ob alles stimmt und wenn ja, dann wird der neue Eintrag in der Datenbank
             // gespeichert und die Felder geleert
             if (titel.isEmpty()) {
-                showMessageDialog("Der Titel darf nicht leer sein");
+                helper.showMessageDialog("Der Titel darf nicht leer sein");
             } else if (author.isEmpty()) {
-                showMessageDialog("Der Autor darf nicht leer sein");
+                helper.showMessageDialog("Der Autor darf nicht leer sein");
             } else if (isbn.isEmpty()) {
-                showMessageDialog("Der ISBN darf nicht leer sein");
+                helper.showMessageDialog("Der ISBN darf nicht leer sein");
             } else if (isbnCorrect == 1) {
-                showMessageDialog("Der ISBN muss aus Zahlen bestehen");
+                helper.showMessageDialog("Der ISBN muss aus Zahlen bestehen");
             } else if (isbnCorrect == 2) {
-                showMessageDialog("Der ISBN hat nicht die richtige Länge." +
+                helper.showMessageDialog("Der ISBN hat nicht die richtige Länge." +
                         "\nEntweder sind es 10 oder 13 Zeichen");
             } else if (isbnCorrect == 3) {
-                showMessageDialog("Die letzte Zahl stimmt nicht überein");
+                helper.showMessageDialog("Die letzte Zahl stimmt nicht überein");
             } else {
                 dataHandler.setBookMap(titel, author, isbn, 0, 0);
                 JOptionPane.showMessageDialog(
@@ -187,28 +178,10 @@ public class AddButton extends JButton {
                         JOptionPane.INFORMATION_MESSAGE
                 );
 
-                for (int i = 0; i < 3; i++) {
-                    JPanel textPanel = (JPanel) titlePanel.getComponent(i);
-                    JTextField textField = (JTextField) textPanel.getComponent(0);
-
-                    textField.setText("");
-                }
-
-                defaultTableModel.addRow(new Object[]{titel, author, isbn});
+                helper.addRowInTable(titlePanel, values, defaultTableModel);
             }
         });
 
         return saveButton;
-    }
-
-    /**
-     * Zeigt einen Fehlerdialog mit der angegebenen Nachricht an.
-     *
-     * @param message Die anzuzeigende Fehlermeldung
-     */
-    public void showMessageDialog(String message) {
-        JOptionPane.showMessageDialog(
-                new JOptionPane(), message, "Fehler", JOptionPane.ERROR_MESSAGE
-        );
     }
 }
