@@ -4,6 +4,7 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 
 ## Änderungen vor der Basisversion
 ## Inhaltsverzeichnis
+- [2024-05-29](#2024-05-29)
 - [2024-05-27](#2024-05-27)
 - [2024-05-23](#2024-05-23)
 - [2024-05-22](#2024-05-22)
@@ -12,10 +13,61 @@ Alle nennenswerten Änderungen an diesem Projekt werden in dieser Datei dokument
 - [2024-05-17](#2024-05-17)
 
 
+## 2024-05-29
+Refaktorierung
+- Neue Dateien erstellt: HelperLendingData.java, LendingActionListener.java, LendingHelper.java
+- Neue Methoden hinzugefügt: DataHandler.java, HelperDataHandler.java, Lending.java
+
+DataHandler.java
+- Methode zur Speicherung, Aktualisierung oder Löschens der ausgeliehenen Bücher hinzugefügt
+- try catch in die connection Methode eingefügt
+- loadDate Methode überarbeitet:
+  - das Erstellen der Maps ausgelagert in HelperDataHandler.java
+  - try catch hinzugefügt
+- try catch in die createDatabase Methode eingefügt 
+
+HelperDataHandler.java
+- HelperDataHandler.java erbt von HelperLendingData.java
+- Methode zum Abrufen der Bücher hinzugefügt
+- Methode zum Abrufen der Mitglieder hinzugefügt
+- Methode zum Abrufen der ausgeliehenen Daten hinzugefügt
+
+HelperLendingData.java
+- Methode zur Verwaltung der Ausleihvorgänge hinzugefügt
+- Methode für die Ausgabe der ID hinzugefügt
+- Methode zum Einfügen eines Datensatzes hinzugefügt
+- Methode zum Aktualisieren eines bestehenden Datensatzes hinzugefügt
+- Methode zum Löschen eines bestehenden Datensatzes hinzugefügt
+
+LendingActionListener.java
+- Methode zur Ausführung des Ausleihvorgangs hinzugefügt
+- Methode zur Überprüfung der Eingabe vom Buch und Mitglied hinzugefügt
+- Methode zur Überprüfung des Ausleihdatums und des Rückgabedatums hinzugefügt
+- Methode zur Speicherung der Ausleihdaten hinzugefügt
+
+LendingHelper.java
+- Methode zur Aktualisierung der bestehenden Ausleihdaten hinzugefügt
+- Methode zur Änderung eines Buches hinzugefügt
+- Methode zur Änderung eines Mitglieds hinzugefügt
+- Methode zur Änderung des Ausleih- und Rückgabedatums hinzugefügt
+- Methode für den MouseListener
+- Methode zur Rückgabe des ausgeliehenen Buches hinzugefügt
+- Methode zur Erstellung von einem DatePicker hinzugefügt
+
+Lending.java
+- Methode zur Erstellung der Widgets überarbeitet
+- Methode zur Filterung in der ComboBox hinzugefügt
+- Methode zur Speicherung der Änderungen in der Ausleih-Tabelle hinzugefügt
+- Methode für das Zurückgeben eines Buches hinzugefügt
+- Methode für das Ausleihen eines Buches hinzugefügt
+- Methode für die Filterung der Bücher
+- Methode für die Filterung der Mitglieder
+
+
 ## 2024-05-27
 Refaktorierung
 - Neue Datei erstellt: HelperClass.java
-- Methoden überarbeitet: AddButton.java, Member.java, Books.java, AddMemberButton.java, DataHandler.java, SetMaps.java
+- Methoden überarbeitet: AddButton.java, Member.java, Books.java, AddMemberButton.java, DataHandler.java, HelperDataHandler.java
 
 HelperClass.java
 - Methode zur bestimmung des Inhalts der Textfelder
@@ -31,7 +83,7 @@ Member.java und Books.java
 DataHandler.java
 - Try catch Statement in die connection Methode hinzugefügt
 
-SetMaps.java
+HelperDataHandler.java
 - Methode zum Ausführen von dem SQL Befehl hinzugefügt
 - setterMemberMap Methode überarbeitet:
   - Befehle anders gestaltet
@@ -43,15 +95,15 @@ SetMaps.java
 
 ## 2024-05-23
 Refaktorierung
-- Neue Datei erstellt: SetMaps.java, AddMember.java
+- Neue Datei erstellt: HelperDataHandler.java, AddMember.java
 - Neues Verzeichnis erstellt: member
 - Methden erstellt: Member.java
 - Methoden überarbeitet: AddButton.java
 
 DataHandler.java
-- Funktion von setBookMap und setMemberMap Methoden nach SetMaps.java ausgelagert
+- Funktion von setBookMap und setMemberMap Methoden nach HelperDataHandler.java ausgelagert
 
-SetMaps.java
+HelperDataHandler.java
 - Methode zum Hinzufügen, Löschen, überarbeiten der Bücher
 - Methode zum Hinzufügen, Löschen, überarbeiten der Mitglieder
 

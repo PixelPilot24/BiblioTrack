@@ -195,13 +195,13 @@ public class Member extends JPanel {
         }
         
         if (name.isEmpty()) {
-            helper.showMessageDialog("Der Name darf nicht leer sein");
+            helper.showErrorDialog("Der Name darf nicht leer sein");
         } else if (email.isEmpty()) {
-            helper.showMessageDialog("Die E-Mail darf nicht leer sein");
+            helper.showErrorDialog("Die E-Mail darf nicht leer sein");
         } else if (phone.isEmpty()) {
-            helper.showMessageDialog("Die Telefonnummer darf nicht leer sein");
+            helper.showErrorDialog("Die Telefonnummer darf nicht leer sein");
         } else if (addMemberButton.checkPhone(phone)) {
-            helper.showMessageDialog("Die Telefonnummer darf nur Zahlen beinhalten");
+            helper.showErrorDialog("Die Telefonnummer darf nur Zahlen beinhalten");
         } else {
             dataHandler.setMemberMap(name, email, phone, id, 1);
             return true;

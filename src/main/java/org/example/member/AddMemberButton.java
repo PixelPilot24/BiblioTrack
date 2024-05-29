@@ -58,13 +58,13 @@ public class AddMemberButton extends JButton {
             String phone = values[2];
 
             if (name.isEmpty()) {
-                helper.showMessageDialog("Der Name darf nicht leer sein");
+                helper.showErrorDialog("Der Name darf nicht leer sein");
             } else if (email.isEmpty()) {
-                helper.showMessageDialog("Die E-Mail darf nicht leer sein");
+                helper.showErrorDialog("Die E-Mail darf nicht leer sein");
             } else if (phone.isEmpty()) {
-                helper.showMessageDialog("Die Telefonnummer darf nicht leer sein");
+                helper.showErrorDialog("Die Telefonnummer darf nicht leer sein");
             } else if (checkPhone(phone)) {
-                helper.showMessageDialog("Die Telefonnummer darf nur Zahlen beinhalten");
+                helper.showErrorDialog("Die Telefonnummer darf nur Zahlen beinhalten");
             } else {
                 // Speichert die Mitglieder in der Datenbank
                 dataHandler.setMemberMap(name, email, phone, 0, 0);

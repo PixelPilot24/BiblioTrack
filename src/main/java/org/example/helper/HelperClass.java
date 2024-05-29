@@ -51,7 +51,7 @@ public class HelperClass {
      *
      * @param message Die anzuzeigende Fehlermeldung
      */
-    public void showMessageDialog(String message) {
+    public void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(
                 new JOptionPane(), message, "Fehler", JOptionPane.ERROR_MESSAGE
         );

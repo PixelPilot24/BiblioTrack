@@ -2,17 +2,14 @@ package org.example.data;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * In dieser Klasse werden die Maps für die Bücher und Mitglieder erstellt, geändert oder gelöscht.
  * */
-public class SetMaps {
-    protected final String bibUrl = "jdbc:postgresql://localhost:5432/bibliotrack";
-    protected final String user = "postgres"; // TODO Namen anpassen
-    protected final String password = ""; // TODO Passwort anpassen
-
+public class HelperDataHandler extends HelperLendingData {
     /**
      * Fügt, löscht oder bearbeitet ein Buch in die Datenbank und gleicht die bookMap ab.
      *
@@ -80,7 +77,7 @@ public class SetMaps {
 
             if (command == 0) {
                 // SQL Befehl zum Einfügen eines neuen Mitglieds
-                sql =   "INSERT INTO member (name, email, phone) VALUES(?, ?, ?) RETURNING id;";
+                sql = "INSERT INTO member (name, email, phone) VALUES(?, ?, ?) RETURNING id;";
             } else if (command == 1) {
                 // SQL Befehl zum Aktualisieren eines Mitglieds
                 sql = "UPDATE member SET name = ?, email = ?, phone = ? WHERE id = ?";
@@ -121,7 +118,8 @@ public class SetMaps {
      * */
     private Map<String, List<Object>> getTableMap(Connection connection, String sql, int command, int id,
                                                   String firstRow, String secondRow, String thirdRow,
-                                                  List<Object> mapList, Map<String, List<Object>> map) throws SQLException {
+                                                  List<Object> mapList, Map<String, List<Object>> map)
+            throws SQLException {
         if (sql != null) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 if (command == 0) {
@@ -157,5 +155,103 @@ public class SetMaps {
             }
         }
         return null;
+    }
+    /**
+     * Methode zum Abrufen der Bücherdaten.
+     *
+     * @param statement Statement zum Abrufen des SQL Befehls.
+     * @return Gibt die {@code  Map} mit dem Inhalt aus
+     * */
+    protected Map<String, List<Object>> getBookData(Statement statement) throws SQLException {
+        Map<String, List<Object>> bookMap = new HashMap<>();
+        // Ruft alle Datensätze der book Tabelle auf
+        ResultSet resultBook = statement.executeQuery("SELECT * FROM book");
+
+        // Extrahiert die Daten und fügt diese in Map hinzu
+        while (resultBook.next()) {
+            int id = resultBook.getInt("id");
+            String title = resultBook.getString("title");
+            String author = resultBook.getString("author");
+            String isbn = resultBook.getString("isbn");
+            List<Object> mapList = new ArrayList<>();
+
+            mapList.add(title);
+            mapList.add(author);
+            mapList.add(isbn);
+
+            bookMap.put(String.valueOf(id), mapList);
+        }
+
+        resultBook.close();
+
+        return bookMap;
+    }
+
+    /**
+     * Methode zum Abrufen der Mitgliederdaten.
+     *
+     * @param statement Statement zum Abrufen des SQL Befehls.
+     * @return Gibt die {@code  Map} mit dem Inhalt aus
+     * */
+    protected Map<String, List<Object>> getMemberData(Statement statement) throws SQLException {
+        Map<String, List<Object>> memberMap = new HashMap<>();
+        // Ruft alle Datensätze der member Tabelle auf
+        ResultSet resultMember = statement.executeQuery("SELECT * FROM member");
+
+        // Extrahiert die Daten und fügt diese in Map hinzu
+        while (resultMember.next()) {
+            int id = resultMember.getInt("id");
+            String name = resultMember.getString("name");
+            String email = resultMember.getString("email");
+            String phone = resultMember.getString("phone");
+            List<Object> mapList = new ArrayList<>();
+
+            mapList.add(name);
+            mapList.add(email);
+            mapList.add(phone);
+
+            memberMap.put(String.valueOf(id), mapList);
+        }
+
+        resultMember.close();
+
+        return memberMap;
+    }
+
+    /**
+     * Methode zum Abrufen der ausgeliehenen Daten.
+     *
+     * @param statement Statement zum Abrufen des SQL Befehls.
+     * @return Gibt die {@code  Map} mit dem Inhalt aus
+     * */
+    protected Map<String, List<Object>> getLendingData(Statement statement) throws SQLException {
+        Map<String, List<Object>> lendingMap = new HashMap<>();
+        // Ruft alle Datensätze der lending Tabelle auf
+        ResultSet resultLending = statement.executeQuery("SELECT * FROM lending");
+
+        // Extrahiert die Daten und fügt diese in Map hinzu
+        while (resultLending.next()) {
+            int id = resultLending.getInt("id");
+            int bookId = resultLending.getInt("book_id");
+            String bookTitle = resultLending.getString("book_title");
+            int member_id = resultLending.getInt("member_id");
+            String memberName = resultLending.getString("member_name");
+            Date lendDate = resultLending.getDate("lenddate");
+            Date returnDate = resultLending.getDate("returndate");
+            List<Object> mapList = new ArrayList<>();
+
+            mapList.add(bookId);
+            mapList.add(bookTitle);
+            mapList.add(member_id);
+            mapList.add(memberName);
+            mapList.add(lendDate);
+            mapList.add(returnDate);
+
+            lendingMap.put(String.valueOf(id), mapList);
+        }
+
+        resultLending.close();
+
+        return lendingMap;
     }
 }

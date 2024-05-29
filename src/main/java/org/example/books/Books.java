@@ -195,18 +195,18 @@ public class Books extends JPanel {
         }
 
         if (title.isEmpty()) {
-            helper.showMessageDialog("Der Titel darf nicht leer sein");
+            helper.showErrorDialog("Der Titel darf nicht leer sein");
         } else if (author.isEmpty()) {
-            helper.showMessageDialog("Der Autor darf nicht leer sein");
+            helper.showErrorDialog("Der Autor darf nicht leer sein");
         } else if (isbn.isEmpty()) {
-            helper.showMessageDialog("Der ISBN darf nicht leer sein");
+            helper.showErrorDialog("Der ISBN darf nicht leer sein");
         } else if (isbnCorrect == 1) {
-            helper.showMessageDialog("Der ISBN muss aus Zahlen bestehen");
+            helper.showErrorDialog("Der ISBN muss aus Zahlen bestehen");
         } else if (isbnCorrect == 2) {
-            helper.showMessageDialog("Der ISBN hat nicht die richtige Länge." +
+            helper.showErrorDialog("Der ISBN hat nicht die richtige Länge." +
                     "\nEntweder sind es 10 oder 13 Zeichen");
         } else if (isbnCorrect == 3) {
-            helper.showMessageDialog("Die letzte Zahl stimmt nicht überein");
+            helper.showErrorDialog("Die letzte Zahl stimmt nicht überein");
         } else {
             dataHandler.setBookMap(title, author, isbn, id, 1);
             return true;

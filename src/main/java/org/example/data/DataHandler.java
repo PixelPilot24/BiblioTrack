@@ -1,8 +1,9 @@
 package org.example.data;
 
+import org.example.helper.HelperClass;
+
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import java.util.Map;
  * Die DataHandler-Klasse verwaltet die Datenbankverbindung und Operationen für die Bibliothek.
  * Sie ermöglicht das Laden, Speichern und Verwalten von Büchern, Mitgliedern und ausgeliehenen Büchern.
  */
-public class DataHandler extends SetMaps {
+public class DataHandler extends HelperDataHandler {
     private Map<String, List<Object>> bookMap; // Map zur Speicherung von Büchern
     private Map<String, List<Object>> memberMap; // Map zur Speicherung von Mitgliedern
     private Map<String, List<Object>> lendingMap; // Map zur Speicherung von ausgeliehenen Büchern
@@ -82,7 +83,6 @@ public class DataHandler extends SetMaps {
      *
      * @return Ausgeliehene Bücher.
      * */
-    @SuppressWarnings("unused")
     public Map<String, List<Object>> getLendingMap() {
         if (lendingMap == null) {
             connection();
@@ -91,6 +91,25 @@ public class DataHandler extends SetMaps {
         return lendingMap;
     }
 
+    /**
+     * Methode für die Speicherung, Aktualisierung oder Löschens der ausgeliehenen Bücher.
+     *
+     * @param bookTitle Der Titel des Buches.
+     * @param memberName Der Name des Mitglieds.
+     * @param lendDate Das Datum vom Ausleihen.
+     * @param returnDate Das Datum der Rückgabe.
+     * @param command Statuscode:
+     *                <ul>
+     *                <li>0: Neues ausgeliehenes Buch hinzufügen</li>
+     *                <li>1: Ausgeliehenes Buch, Mitglied oder Datum aktualisieren</li>
+     *                <li>2: Daten Löschen</li>
+     *                </ul>
+     * @param id Die ID der Daten. Falls unbekannt, dann 0.
+     * */
+    public void setLendingMap(String bookTitle, String memberName, LocalDate lendDate, LocalDate returnDate,
+                        int command, int id) {
+        this.lendingMap = manageLendingBook(bookTitle, memberName, lendDate, returnDate, lendingMap, command, id);
+    }
      /**
      * Stellt die Verbindung zur Datenbank her und lädt die Daten.
      * Wenn die Datenbank nicht existiert, wird sie erstellt.
@@ -121,20 +140,26 @@ public class DataHandler extends SetMaps {
                 if (databaseExists) {
                     try (Connection bibConnection = DriverManager.getConnection(bibUrl, user, password)) {
                         loadData(bibConnection);
+                    } catch (SQLException e) {
+                        System.out.println("Connection error (02): " + e.getMessage());
+                        new HelperClass().showErrorDialog("Fehler beim erstellen einer Verbindung (02): " + e.getMessage());
                     }
                 } else {
                     statement.executeUpdate("CREATE DATABASE bibliotrack");
 
                     try (Connection bibConnection = DriverManager.getConnection(bibUrl, user, password)) {
                         createDatabase(bibConnection);
+                    } catch (SQLException e) {
+                        System.out.println("Connection error (03): " + e.getMessage());
+                        new HelperClass().showErrorDialog("Fehler beim erstellen einer Verbindung (03): " + e.getMessage());
                     }
                 }
+            } catch (SQLException e) {
+                System.out.println("Connection error (00): " + e.getMessage());
+                new HelperClass().showErrorDialog("Fehler beim erstellen einer Verbindung: (00)" + e.getMessage());
             }
-
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("PostgreSQL JDBC Driver not found.", e);
-        }  catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -142,115 +167,60 @@ public class DataHandler extends SetMaps {
      * Lädt die Daten aus der Datenbank und speichert sie in den entsprechenden Maps.
      *
      * @param connection Die Verbindung zur Bibliotrack-Datenbank.
-     * @throws SQLException Falls ein Fehler beim Laden der Daten auftritt.
      */
-    private void loadData(Connection connection) throws SQLException {
-        // Initialisierung der Maps
-        bookMap = new HashMap<>();
-        memberMap = new HashMap<>();
-        lendingMap = new HashMap<>();
-
-        Statement statement = connection.createStatement();
-        // Ruft alle Datensätze der book Tabelle auf
-        ResultSet resultBook = statement.executeQuery("SELECT * FROM book");
-
-        // Extrahiert die Daten und fügt diese in Map hinzu
-        while (resultBook.next()) {
-            int id = resultBook.getInt("id");
-            String title = resultBook.getString("title");
-            String author = resultBook.getString("author");
-            String isbn = resultBook.getString("isbn");
-            List<Object> mapList = new ArrayList<>();
-
-            mapList.add(title);
-            mapList.add(author);
-            mapList.add(isbn);
-
-            bookMap.put(String.valueOf(id), mapList);
+    private void loadData(Connection connection) {
+        try (Statement statement = connection.createStatement()) {
+            bookMap = getBookData(statement);
+            memberMap = getMemberData(statement);
+            lendingMap = getLendingData(statement);
+        } catch (SQLException e) {
+            System.out.println("Connection error (01): " + e.getMessage());
+            new HelperClass().showErrorDialog("Fehler beim erstellen einer Verbindung: (01)" + e.getMessage());
         }
-
-        resultBook.close();
-        // Ruft alle Datensätze der member Tabelle auf
-        ResultSet resultMember = statement.executeQuery("SELECT * FROM member");
-
-        // Extrahiert die Daten und fügt diese in Map hinzu
-        while (resultMember.next()) {
-            int id = resultMember.getInt("id");
-            String name = resultMember.getString("name");
-            String email = resultMember.getString("email");
-            String phone = resultMember.getString("phone");
-            List<Object> mapList = new ArrayList<>();
-
-            mapList.add(name);
-            mapList.add(email);
-            mapList.add(phone);
-
-            memberMap.put(String.valueOf(id), mapList);
-        }
-
-        resultMember.close();
-        // Ruft alle Datensätze der lending Tabelle auf
-        ResultSet resultLending = statement.executeQuery("SELECT * FROM lending");
-
-        // Extrahiert die Daten und fügt diese in Map hinzu
-        while (resultLending.next()) {
-            int id = resultLending.getInt("id");
-            int bookId = resultLending.getInt("book_id");
-            int member_id = resultLending.getInt("member_id");
-            Date lendDate = resultLending.getDate("lend_date");
-            Date returnDate = resultLending.getDate("return_date");
-            List<Object> mapList = new ArrayList<>();
-
-            mapList.add(bookId);
-            mapList.add(member_id);
-            mapList.add(lendDate);
-            mapList.add(returnDate);
-
-            lendingMap.put(String.valueOf(id), mapList);
-        }
-
-        resultLending.close();
-        statement.close();
     }
 
     /**
      * Erstellt in der neu erstellten Datenbank die Tabellen.
      *
      * @param connection Die Verbindung zur Bibliotrack-Datenbank.
-     * @throws SQLException Falls ein Fehler beim Laden der Daten auftritt.
      * */
-    private void createDatabase(Connection connection) throws SQLException {
-        Statement statement = connection.createStatement();
-        // Befehl für die Erstellung der Tabelle mit den Spalten
-        String commandBooks = "CREATE TABLE book(" +
-                "id SERIAL PRIMARY KEY," +
-                "title VARCHAR(255) NOT NULL," +
-                "author VARCHAR(255) NOT NULL," +
-                "isbn VARCHAR(13) NOT NULL" +
-                ");";
-        String commandMember = "CREATE TABLE member(" +
-                "id SERIAL PRIMARY KEY," +
-                "name VARCHAR(100) NOT NULL," +
-                "email VARCHAR(50) NOT NULL," +
-                "phone VARCHAR(15) NOT NULL" +
-                ");";
-        String commandLending = "CREATE TABLE lending(" +
-                "id SERIAL PRIMARY KEY," +
-                "book_id INT, " +
-                "CONSTRAINT fk_lending_book " +
-                "   foreign KEY (book_id) " +
-                "   REFERENCES book(id)," +
-                "member_id INT, " +
-                "CONSTRAINT fk_lending_member " +
-                "   foreign KEY(member_id) " +
-                "   REFERENCES member(id), " +
-                "lend_date DATE NOT NULL DEFAULT CURRENT_DATE, " +
-                "return_date DATE NOT NULL" +
-                ");";
+    private void createDatabase(Connection connection) {
+        try (Statement statement = connection.createStatement()) {
+            // Befehl für die Erstellung der Tabelle mit den Spalten
+            String createBookCommand = """
+                CREATE TABLE book(
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                author VARCHAR(255) NOT NULL,
+                isbn VARCHAR(13) NOT NULL
+                );""";
+            String createMemberCommand = """
+                CREATE TABLE member(
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(50) NOT NULL,
+                phone VARCHAR(15) NOT NULL
+                );""";
+            String createLendingCommand = """
+                CREATE TABLE lending(
+                id SERIAL PRIMARY KEY,
+                book_id INT,
+                CONSTRAINT fk_book FOREIGN KEY (book_id) REFERENCES book(id),
+                member_id INT,
+                CONSTRAINT fk_member FOREIGN KEY (member_id) REFERENCES member(id),
+                book_title VARCHAR(255) NOT NULL,
+                member_name VARCHAR(100) NOT NULL,
+                lendDate DATE NOT NULL,
+                returnDate DATE NOT NULL
+                );""";
 
-        // Führt die Befehle aus
-        statement.executeUpdate(commandBooks);
-        statement.executeUpdate(commandMember);
-        statement.executeUpdate(commandLending);
+            // Führt die Befehle aus
+            statement.executeUpdate(createBookCommand);
+            statement.executeUpdate(createMemberCommand);
+            statement.executeUpdate(createLendingCommand);
+        } catch (SQLException e) {
+            System.err.println("Error creating database: " + e.getMessage());
+            new HelperClass().showErrorDialog("Fehler beim erstellen der Datenbank: " + e.getMessage());
+        }
     }
 }
